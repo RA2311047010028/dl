@@ -1,0 +1,22 @@
+# Cell 8 - Feature extractor: ResNet50 without top (global average pooling to vector)
+from tensorflow.keras.applications.resnet import preprocess_input
+resnet_base = ResNet50(weights='imagenet', include_top=False, input_shape=(32,32,3))
+x = layers.GlobalAveragePooling2D()(resnet_base.output)
+feature_extractor = Model(inputs=resnet_base.input, outputs=x, name='ResNet50_feat')
+feature_extractor.summary()# Cell 9 - Extract features for a small subset of CIFAR-10 images
+# Resize CIFAR images to 224x224 if using default ResNet input sizes; but our resnet_base input_shape=(32,32,3)
+# We built the model with 32x32 input above — OK.
+subset = x_train[:256]  # 256 images
+# preprocess_input expects values in the range the model expects; for our small model it's fine because weights were trained on 0-255 images.
+# But we used normalization earlier; revert for preprocess:
+subset_raw = ((subset + 1.0) * 127.5).astype('float32')  # map back to [0,255]
+subset_pre = preprocess_input(subset_raw)
+features = feature_extractor.predict(subset_pre, batch_size=32)
+print("features shape:", features.shape)  # (256, feature_dim)# Optional: visualize feature vectors with PCA (2D scatter)
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+feat2 = pca.fit_transform(features)
+plt.figure(figsize=(6,4))
+plt.scatter(feat2[:,0], feat2[:,1], s=8)
+plt.title('PCA of extracted features (256 CIFAR images)')
+plt.show()
