@@ -1,0 +1,13 @@
+# Cell 7 - Load ResNet50 and print architecture summary
+from tensorflow.keras.applications import ResNet50
+resnet = ResNet50(weights='imagenet', include_top=True)  # include_top -> full classifier
+resnet.summary()  # prints architecture: layers, shapes, params
+
+# Optional: plot architecture (requires graphviz/pydot installed)
+try:
+    from tensorflow.keras.utils import plot_model
+    plot_model(resnet, show_shapes=True, show_layer_names=True, to_file='resnet50.png')
+    from IPython.display import Image, display
+    display(Image('resnet50.png'))
+except Exception as e:
+    print("plot_model error (graphviz may not be installed). You still have resnet.summary().\n", e)
